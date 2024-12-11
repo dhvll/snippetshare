@@ -3,12 +3,13 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"github.com/dhvll/snippetshare/internal/models"
-	_ "github.com/go-sql-driver/mysql"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/dhvll/snippetshare/internal/models"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type application struct {

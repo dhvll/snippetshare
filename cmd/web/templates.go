@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/dhvll/snippetshare/internal/models"
 	"html/template"
 	"path/filepath"
 	"time"
+
+	"github.com/dhvll/snippetshare/internal/models"
 )
 
 type templateData struct {

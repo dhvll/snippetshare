@@ -56,12 +56,12 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
-	
+
 	err := r.ParseForm()
-	if err!= nil {
+	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
-	}	
+	}
 
 	// retreive title and content
 	title := r.PostForm.Get("title")
@@ -73,15 +73,9 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
-	} 
-	 
-	id, err := app.snippets.Insert(title, content, expires)
-		if err != nil {
-		app.serverError(w,err)
-		return
 	}
 
-	fieldErrors := make(map[string]string)	
+	fieldErrors := make(map[string]string)
 
 	if strings.TrimSpace(title) == "" {
 		fieldErrors["title"] = "This field is blank"
@@ -89,7 +83,7 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		fieldErrors["title"] = "This field can be longer than 100 characters"
 	}
 
- 	if strings.TrimSpace(content) == "" {
+	if strings.TrimSpace(content) == "" {
 		fieldErrors["content"] = "This cannot be  blank"
 	}
 
@@ -102,13 +96,12 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	id, err = app.snippets.Insert(title, content, expires)
-	
+	id, err := app.snippets.Insert(title, content, expires)
+
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
-
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 
