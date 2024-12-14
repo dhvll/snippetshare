@@ -99,7 +99,17 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 
 }
 
+type userSignupForm struct {
+	Name                string `form:"name"`
+	Email               string `form:"email"`
+	Password            string `form:password"`
+	validator.Validator `form:"-"`
+}
+
 func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = userSignupForm{}
+	app.render(w, http.StatusOK, "signup.tmpl", data)
 	fmt.Fprintln(w, "user signup")
 }
 
