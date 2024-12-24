@@ -75,3 +75,23 @@ func (m *SnippetModel) Latest() ([]*Snippet, error) {
 	}
 	return snippets, nil
 }
+
+func (m *SnippetModel) Update(id int, title, content string, expires int) error {
+	stmt := `UPDATE snippets SET title = ?, content = ?, expires = DATE_ADD(created, INTERVAL ? DAY) WHERE id = ?`
+
+	_, err := m.DB.Exec(stmt, title, content, expires, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *SnippetModel) Delete(id int) error {
+	stmt := `DELETE FROM snippets WHERE id = ?`
+
+	_, err := m.DB.Exec(stmt, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
