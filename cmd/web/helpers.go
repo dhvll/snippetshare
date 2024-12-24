@@ -8,6 +8,7 @@ import (
 	"runtime/debug"
 	"time"
 
+	"github.com/dhvll/snippetshare/internal/models"
 	"github.com/go-playground/form/v4"
 	"github.com/justinas/nosurf"
 )
@@ -94,10 +95,14 @@ func (app *application) isAuthenticated(r *http.Request) bool {
 	return isAuthenticated
 }
 
-func convertToIST(t time.Time) (time.Time, error) {
+func convertToIST(snippets []*models.Snippet) error {
 	location, err := time.LoadLocation("Asia/Kolkata")
 	if err != nil {
-		return time.Time{}, err
+		return err
 	}
-	return t.In(location), nil
+	for _, snippet := range snippets {
+		snippet.CreatedAt = snippet.CreatedAt.In(location)
+		snippet.ExpiresAt = snippet.ExpiresAt.In(location)
+	}
+	return nil
 }

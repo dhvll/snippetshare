@@ -20,17 +20,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for i, snippet := range snippets {
-		snippets[i].CreatedAt, err = convertToIST(snippet.CreatedAt)
-		if err != nil {
-			app.serverError(w, err)
-			return
-		}
-		snippets[i].ExpiresAt, err = convertToIST(snippet.ExpiresAt)
-		if err != nil {
-			app.serverError(w, err)
-			return
-		}
+	err = convertToIST(snippets)
+	if err != nil {
+		app.serverError(w, err)
+		return
 	}
 
 	data := app.newTemplateData(r)
@@ -56,12 +49,7 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	snippet.CreatedAt, err = convertToIST(snippet.CreatedAt)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-	snippet.ExpiresAt, err = convertToIST(snippet.ExpiresAt)
+	err = convertToIST([]*models.Snippet{snippet})
 	if err != nil {
 		app.serverError(w, err)
 		return
