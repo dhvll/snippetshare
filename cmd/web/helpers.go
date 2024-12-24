@@ -93,3 +93,11 @@ func (app *application) isAuthenticated(r *http.Request) bool {
 
 	return isAuthenticated
 }
+
+func convertToIST(t time.Time) (time.Time, error) {
+	location, err := time.LoadLocation("Asia/Kolkata")
+	if err != nil {
+		return time.Time{}, err
+	}
+	return t.In(location), nil
+}
