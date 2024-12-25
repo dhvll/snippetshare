@@ -12,6 +12,7 @@ type Snippet struct {
 	Content   string
 	CreatedAt time.Time
 	ExpiresAt time.Time
+	UserID    int
 }
 
 // SnippetModel this wraps sql.Db pool
@@ -20,10 +21,10 @@ type SnippetModel struct {
 }
 
 // Insert This will insert snippet into model
-func (m *SnippetModel) Insert(title string, content string, expiresAt int) (int, error) {
-	stmt := `INSERT INTO snippets (title, content, created, expires) VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY))`
+func (m *SnippetModel) Insert(title string, content string, expiresAt int, userID int) (int, error) {
+	stmt := `INSERT INTO snippets (title, content, created, expires, user_id) VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY), ?)`
 
-	result, err := m.DB.Exec(stmt, title, content, expiresAt)
+	result, err := m.DB.Exec(stmt, title, content, expiresAt, userID)
 	if err != nil {
 		return 0, err
 	}
@@ -35,12 +36,12 @@ func (m *SnippetModel) Insert(title string, content string, expiresAt int) (int,
 }
 
 func (m *SnippetModel) Get(id int) (*Snippet, error) {
-	stmt := `SELECT id, title, content, created, expires FROM snippets WHERE expires > UTC_TIMESTAMP() AND id = ?`
+	stmt := `SELECT id, title, content, created, expires, user_id FROM snippets WHERE expires > UTC_TIMESTAMP() AND id = ?`
 
 	row := m.DB.QueryRow(stmt, id)
 	s := &Snippet{}
 
-	err := row.Scan(&s.ID, &s.Title, &s.Content, &s.CreatedAt, &s.ExpiresAt)
+	err := row.Scan(&s.ID, &s.Title, &s.Content, &s.CreatedAt, &s.ExpiresAt, &s.UserID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNoRecord
@@ -52,7 +53,7 @@ func (m *SnippetModel) Get(id int) (*Snippet, error) {
 }
 
 func (m *SnippetModel) Latest() ([]*Snippet, error) {
-	stmt := `SELECT id, title, content, created, expires FROM snippets WHERE expires > UTC_TIMESTAMP() ORDER BY id DESC LIMIT 10`
+	stmt := `SELECT id, title, content, created, expires, user_id FROM snippets WHERE expires > UTC_TIMESTAMP() ORDER BY id DESC LIMIT 10`
 
 	rows, err := m.DB.Query(stmt)
 	if err != nil {
@@ -64,7 +65,7 @@ func (m *SnippetModel) Latest() ([]*Snippet, error) {
 	snippets := []*Snippet{}
 	for rows.Next() {
 		s := &Snippet{}
-		err = rows.Scan(&s.ID, &s.Title, &s.Content, &s.CreatedAt, &s.ExpiresAt)
+		err = rows.Scan(&s.ID, &s.Title, &s.Content, &s.CreatedAt, &s.ExpiresAt, &s.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -76,10 +77,10 @@ func (m *SnippetModel) Latest() ([]*Snippet, error) {
 	return snippets, nil
 }
 
-func (m *SnippetModel) Update(id int, title, content string, expires int) error {
-	stmt := `UPDATE snippets SET title = ?, content = ?, expires = DATE_ADD(created, INTERVAL ? DAY) WHERE id = ?`
+func (m *SnippetModel) Update(id int, title, content string, expires int, userID int) error {
+	stmt := `UPDATE snippets SET title = ?, content = ?, expires = DATE_ADD(created, INTERVAL ? DAY) WHERE id = ? AND user_id = ?`
 
-	_, err := m.DB.Exec(stmt, title, content, expires, id)
+	_, err := m.DB.Exec(stmt, title, content, expires, id, userID)
 	if err != nil {
 		return err
 	}

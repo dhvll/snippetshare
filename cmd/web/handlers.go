@@ -98,8 +98,8 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		app.render(w, http.StatusUnprocessableEntity, "create.html", data)
 		return
 	}
-
-	id, err := app.snippets.Insert(form.Title, form.Content, form.Expires)
+	userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	id, err := app.snippets.Insert(form.Title, form.Content, form.Expires, userID)
 
 	if err != nil {
 		app.serverError(w, err)
@@ -128,6 +128,12 @@ func (app *application) snippetUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	if snippet.UserID != userID {
+		app.clientError(w, http.StatusForbidden)
+		return
+	}
+
 	data := app.newTemplateData(r)
 	data.Form = snippetUpdateForm{
 		Title:   snippet.Title,
@@ -135,6 +141,7 @@ func (app *application) snippetUpdate(w http.ResponseWriter, r *http.Request) {
 		Expires: int(snippet.ExpiresAt.Sub(snippet.CreatedAt).Hours() / 24),
 	}
 	data.Snippet = snippet
+	data.AuthenticatedUserID = userID
 	app.render(w, http.StatusOK, "update.html", data)
 }
 
@@ -172,7 +179,8 @@ func (app *application) snippetUpdatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = app.snippets.Update(id, form.Title, form.Content, form.Expires)
+	userID := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	err = app.snippets.Update(id, form.Title, form.Content, form.Expires, userID)
 	if err != nil {
 		app.serverError(w, err)
 		return
