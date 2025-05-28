@@ -83,8 +83,3 @@ The application will be available at `https://localhost:4000`
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- Thanks to all contributors who have helped with the project
-- Built with ❤️ using Go
